@@ -204,6 +204,7 @@ export class GenerationService {
     let currentMessages: Content[] = [userMessage];
     let finalText = '';
     const transcript: TranscriptItem[] = [];
+    let totalUsage: any = null;
 
     while (true) {
       const result = await this.processGenerationTurn(
@@ -218,6 +219,20 @@ export class GenerationService {
       finalText += result.turnText;
       transcript.push(...result.transcriptItems);
       allMessages.push(...result.newMessages);
+
+      // Accumulate token usage from all turns
+      if (result.usage) {
+        if (!totalUsage) {
+          totalUsage = { ...result.usage };
+        } else {
+          totalUsage.prompt_tokens += result.usage.prompt_tokens || 0;
+          totalUsage.completion_tokens += result.usage.completion_tokens || 0;
+          totalUsage.total_tokens += result.usage.total_tokens || 0;
+          totalUsage.cached_tokens = (totalUsage.cached_tokens || 0) + (result.usage.cached_tokens || 0);
+          totalUsage.thinking_tokens = (totalUsage.thinking_tokens || 0) + (result.usage.thinking_tokens || 0);
+          totalUsage.tool_tokens = (totalUsage.tool_tokens || 0) + (result.usage.tool_tokens || 0);
+        }
+      }
 
       if (result.toolRequests.length > 0) {
         const { toolResponseParts, toolMessages } = await this.processToolCalls(
@@ -234,7 +249,36 @@ export class GenerationService {
       }
     }
 
-    return { finalText, transcript, history: allMessages };
+    // If no usage metadata was collected from the model, attempt a fallback
+    if (!totalUsage) {
+      try {
+        const contentGenerator = geminiClient.getContentGenerator?.();
+        if (contentGenerator?.countTokens) {
+          // Count prompt/request tokens
+          const promptCount = await contentGenerator.countTokens({
+            model: this.config.getModel(),
+            contents: allMessages,
+          }).then((r: any) => r.totalTokens || 0);
+
+          // Count completion tokens by counting the final text
+          const completionCount = await contentGenerator.countTokens({
+            model: this.config.getModel(),
+            contents: [{ role: 'model', parts: [{ text: finalText }] }],
+          }).then((r: any) => r.totalTokens || 0);
+
+          totalUsage = {
+            prompt_tokens: promptCount,
+            completion_tokens: completionCount,
+            total_tokens: promptCount + completionCount,
+          };
+        }
+      } catch (err) {
+        // ignore fallback failures
+        console.warn('[API] Token count fallback failed:', err);
+      }
+    }
+
+    return { finalText, transcript, history: allMessages, usage: totalUsage };
   }
 
   private async processGenerationTurn(
@@ -249,11 +293,13 @@ export class GenerationService {
     transcriptItems: TranscriptItem[];
     newMessages: Content[];
     toolRequests: ToolCallRequestInfo[];
+    usage?: any;
   }> {
     const toolCallRequests: ToolCallRequestInfo[] = [];
     let turnText = '';
     const transcriptItems: TranscriptItem[] = [];
     const newMessages: Content[] = [];
+    let turnUsage: any = null;
 
     const responseStream = geminiClient.sendMessageStream(
       currentMessages[0]?.parts || [],
@@ -261,14 +307,57 @@ export class GenerationService {
       promptId,
     );
 
-    for await (const event of responseStream) {
-      if (signal.aborted) break;
-      
-      if (event.type === GeminiEventType.Content) {
-        turnText += event.value;
-        onContentChunk?.(event.value);
-      } else if (event.type === GeminiEventType.ToolCallRequest) {
-        toolCallRequests.push(event.value);
+    // Use the iterator directly so we can capture the generator's final return value
+    const iterator = responseStream[Symbol.asyncIterator]();
+    try {
+      while (true) {
+        const { value: event, done } = await iterator.next();
+
+        if (done) {
+          // The generator finished. `event` is the returned Turn instance (if any).
+          try {
+            const turn = event as any;
+            const debugResponses = turn?.getDebugResponses?.() || [];
+            const lastResponse = debugResponses[debugResponses.length - 1];
+            if (lastResponse?.usageMetadata) {
+              const usage = lastResponse.usageMetadata;
+              turnUsage = {
+                prompt_tokens: usage.promptTokenCount || 0,
+                completion_tokens: usage.candidatesTokenCount || 0,
+                total_tokens: usage.totalTokenCount || 0,
+                cached_tokens: usage.cachedContentTokenCount || 0,
+                thinking_tokens: usage.thoughtsTokenCount || 0,
+                tool_tokens: usage.toolUsePromptTokenCount || 0,
+              };
+            }
+          } catch (err) {
+            // ignore
+          }
+          break;
+        }
+
+        if (signal.aborted) {
+          break;
+        }
+
+        if (event.type === GeminiEventType.Content) {
+          turnText += event.value;
+          onContentChunk?.(event.value);
+        } else if (event.type === GeminiEventType.ToolCallRequest) {
+          toolCallRequests.push(event.value);
+        } else {
+          // Other events are handled by caller via onEvent
+          // but we don't need to act here for now
+        }
+      }
+    } finally {
+      // If the iterator has a return method and we aborted, attempt to close it
+      if (signal.aborted && typeof iterator.return === 'function') {
+        try {
+          await iterator.return();
+        } catch {
+          // ignore
+        }
       }
     }
 
@@ -288,7 +377,7 @@ export class GenerationService {
       });
     }
 
-    return { turnText, transcriptItems, newMessages, toolRequests: toolCallRequests };
+    return { turnText, transcriptItems, newMessages, toolRequests: toolCallRequests, usage: turnUsage };
   }
 
   private async processToolCalls(

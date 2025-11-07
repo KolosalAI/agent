@@ -55,12 +55,23 @@ export interface GenerateResponse {
   prompt_id: string;
   messages: TranscriptItem[];
   history: Content[];
+  usage?: TokenUsage;
+}
+
+export interface TokenUsage {
+  prompt_tokens: number;
+  completion_tokens: number;
+  total_tokens: number;
+  cached_tokens?: number;
+  thinking_tokens?: number;
+  tool_tokens?: number;
 }
 
 export interface GenerationResult {
   finalText: string;
   transcript: TranscriptItem[];
   history: Content[];
+  usage?: TokenUsage;
 }
 
 export type StreamEventCallback = (event: TranscriptItem) => void;

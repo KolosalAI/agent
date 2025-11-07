@@ -6,7 +6,7 @@
 
 import type { Config } from '@kolosal-ai/kolosal-ai-core';
 import type { ApiServerOptions, ApiServer } from './types/index.js';
-import { ApiServerFactory } from './server.factory.js';
+import { createApiServer } from './server.factory.js';
 
 // Re-export types for backward compatibility
 export type { ApiServerOptions, ApiServer } from './types/index.js';
@@ -18,5 +18,5 @@ export function startApiServer(
   config: Config,
   options: ApiServerOptions,
 ): Promise<ApiServer> {
-  return ApiServerFactory.create(config, options);
+  return createApiServer(config, options);
 }

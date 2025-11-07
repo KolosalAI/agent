@@ -130,11 +130,10 @@ Alternatively, create a configuration file at `config/settings.json`:
 
 > **Note**: The API may issue multiple calls to the underlying AI model per request for complex tasks, which can result in higher token usage.
 
-
-
 ## Usage Examples
 
 ### Code Analysis & Understanding
+
 ```bash
 # Analyze project structure
 curl -X POST http://localhost:8080/v1/generate \
@@ -153,6 +152,7 @@ curl -X POST http://localhost:8080/v1/generate \
 ```
 
 ### Code Development & Refactoring
+
 ```bash
 # Code refactoring
 curl -X POST http://localhost:8080/v1/generate \
@@ -171,6 +171,7 @@ curl -X POST http://localhost:8080/v1/generate \
 ```
 
 ### Streaming Responses
+
 ```bash
 # Real-time streaming response
 curl -N -X POST http://localhost:8080/v1/generate \
@@ -183,27 +184,32 @@ curl -N -X POST http://localhost:8080/v1/generate \
 ### Development Setup
 
 1. Clone the repository:
+
 ```bash
 git clone https://github.com/KolosalAI/agent.git
 cd agent
 ```
 
 2. Install dependencies:
+
 ```bash
 npm install
 ```
 
 3. Build the project:
+
 ```bash
 npm run build
 ```
 
 4. Start the development server:
+
 ```bash
 npm run start
 ```
 
 5. Run tests:
+
 ```bash
 npm test
 ```
@@ -213,7 +219,7 @@ npm test
 ```
 packages/
 ├── api-server/          # HTTP API server implementation
-├── core/               # Core AI and tool functionality  
+├── core/               # Core AI and tool functionality
 └── test-utils/         # Shared testing utilities
 
 scripts/                # Build and deployment scripts
@@ -238,9 +244,6 @@ Kolosal Agent API is built upon and incorporates concepts from several open-sour
 ## License
 
 Licensed under the Apache License, Version 2.0. See [LICENSE](./LICENSE) for the full license text.
-
-
-
 
 ## API Documentation
 
@@ -283,6 +286,7 @@ Or configure via `config/settings.json`:
 Check if the API server is running and healthy.
 
 **Response:**
+
 ```json
 {
   "status": "ok",
@@ -298,63 +302,64 @@ Generate AI-powered responses for code assistance, analysis, and development tas
 
 **Request Headers:**
 
-| Header | Required | Description | Example |
-|--------|----------|-------------|---------|
-| `Content-Type` | Yes | Request body format | `application/json` |
-| `Authorization` | Conditional | Bearer token for authentication | `Bearer your-secret-token` |
-| `Accept` | No | Preferred response format | `application/json` (default) |
-| `User-Agent` | No | Client identification | `MyApp/1.0.0` |
+| Header          | Required    | Description                     | Example                      |
+| --------------- | ----------- | ------------------------------- | ---------------------------- |
+| `Content-Type`  | Yes         | Request body format             | `application/json`           |
+| `Authorization` | Conditional | Bearer token for authentication | `Bearer your-secret-token`   |
+| `Accept`        | No          | Preferred response format       | `application/json` (default) |
+| `User-Agent`    | No          | Client identification           | `MyApp/1.0.0`                |
 
 **Response Headers:**
 
-| Header | Description | Example |
-|--------|-------------|---------|
-| `Content-Type` | Response body format | `application/json` or `text/event-stream` |
-| `Access-Control-Allow-Origin` | CORS origin (if enabled) | `*` or specific domain |
-| `Cache-Control` | Caching policy | `no-cache` |
-| `X-Request-ID` | Request tracking ID | `req-abc123-def456` |
+| Header                        | Description              | Example                                   |
+| ----------------------------- | ------------------------ | ----------------------------------------- |
+| `Content-Type`                | Response body format     | `application/json` or `text/event-stream` |
+| `Access-Control-Allow-Origin` | CORS origin (if enabled) | `*` or specific domain                    |
+| `Cache-Control`               | Caching policy           | `no-cache`                                |
+| `X-Request-ID`                | Request tracking ID      | `req-abc123-def456`                       |
 
 **Request Body:**
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `input` | string | Yes | The prompt or question to send to the AI |
-| `stream` | boolean | No | Enable streaming response (default: false) |
-| `prompt_id` | string | No | Unique identifier for the request |
-| `history` | array | No | Conversation history for multi-turn conversations |
-| `model` | string | No | Override the default model |
-| `api_key` | string | No | Override the default API key |
-| `base_url` | string | No | Override the default API base URL |
-| `working_directory` | string | No | Set the working directory for file operations |
+| Field               | Type    | Required | Description                                       |
+| ------------------- | ------- | -------- | ------------------------------------------------- |
+| `input`             | string  | Yes      | The prompt or question to send to the AI          |
+| `stream`            | boolean | No       | Enable streaming response (default: false)        |
+| `prompt_id`         | string  | No       | Unique identifier for the request                 |
+| `history`           | array   | No       | Conversation history for multi-turn conversations |
+| `model`             | string  | No       | Override the default model                        |
+| `api_key`           | string  | No       | Override the default API key                      |
+| `base_url`          | string  | No       | Override the default API base URL                 |
+| `working_directory` | string  | No       | Set the working directory for file operations     |
 
 #### Detailed Request Model
 
 ```typescript
 interface GenerateRequest {
   // Required fields
-  input: string;                    // The prompt or question to send to the AI
-  
+  input: string; // The prompt or question to send to the AI
+
   // Optional fields
-  stream?: boolean;                 // Enable streaming response (default: false)
-  prompt_id?: string;               // Unique identifier for the request
-  history?: ConversationMessage[];  // Previous conversation context
-  model?: string;                   // AI model to use (e.g., "gpt-4", "z-ai/glm-4.6")
-  api_key?: string;                 // API key for the AI service
-  base_url?: string;                // Base URL for the AI service API
-  working_directory?: string;       // Working directory for file operations
+  stream?: boolean; // Enable streaming response (default: false)
+  prompt_id?: string; // Unique identifier for the request
+  history?: ConversationMessage[]; // Previous conversation context
+  model?: string; // AI model to use (e.g., "gpt-4", "z-ai/glm-4.6")
+  api_key?: string; // API key for the AI service
+  base_url?: string; // Base URL for the AI service API
+  working_directory?: string; // Working directory for file operations
 }
 
 interface ConversationMessage {
   type: 'user' | 'assistant' | 'tool_call' | 'tool_result';
-  content?: string;                 // Message content (for user/assistant)
-  name?: string;                    // Tool name (for tool_call/tool_result)
-  arguments?: Record<string, any>;  // Tool arguments (for tool_call)
-  ok?: boolean;                     // Tool execution status (for tool_result)
-  responseText?: string;            // Tool response (for tool_result)
+  content?: string; // Message content (for user/assistant)
+  name?: string; // Tool name (for tool_call/tool_result)
+  arguments?: Record<string, any>; // Tool arguments (for tool_call)
+  ok?: boolean; // Tool execution status (for tool_result)
+  responseText?: string; // Tool response (for tool_result)
 }
 ```
 
 **Example Request:**
+
 ```json
 {
   "input": "Explain this codebase structure and suggest improvements",
@@ -368,7 +373,7 @@ interface ConversationMessage {
       "content": "What files are in this project?"
     },
     {
-      "type": "assistant", 
+      "type": "assistant",
       "content": "I can see several TypeScript files including API handlers..."
     }
   ]
@@ -380,40 +385,60 @@ interface ConversationMessage {
 #### Detailed Response Models
 
 ```typescript
+// Token usage information
+interface TokenUsage {
+  prompt_tokens: number; // Tokens used in the input/prompt
+  completion_tokens: number; // Tokens generated in the response
+  total_tokens: number; // Total tokens used (input + output)
+  cached_tokens?: number; // Cached tokens (if supported by model)
+  thinking_tokens?: number; // Tokens used for reasoning (if supported)
+  tool_tokens?: number; // Tokens used for tool calls (if applicable)
+}
+
 // Non-streaming success response
 interface GenerateResponse {
-  output: string;                   // Final AI-generated response text
-  prompt_id: string;                // Request identifier (echoed back)
-  messages: TranscriptMessage[];    // Transcript of this conversation turn
-  history: ConversationMessage[];   // Updated conversation history
+  output: string; // Final AI-generated response text
+  prompt_id: string; // Request identifier (echoed back)
+  messages: TranscriptMessage[]; // Transcript of this conversation turn
+  history: ConversationMessage[]; // Updated conversation history
+  usage?: TokenUsage; // Token usage statistics
 }
 
 // Error response
 interface ErrorResponse {
-  error: string;                    // Error message describing what went wrong
+  error: string; // Error message describing what went wrong
 }
 
 // Transcript message (part of response)
 interface TranscriptMessage {
   type: 'user' | 'assistant' | 'tool_call' | 'tool_result';
-  content?: string;                 // Message content
-  name?: string;                    // Tool name (for tool operations)
-  arguments?: Record<string, any>;  // Tool arguments (for tool_call)
-  ok?: boolean;                     // Success status (for tool_result)
-  responseText?: string;            // Tool output (for tool_result)
-  timestamp?: string;               // When the message occurred
+  content?: string; // Message content
+  name?: string; // Tool name (for tool operations)
+  arguments?: Record<string, any>; // Tool arguments (for tool_call)
+  ok?: boolean; // Success status (for tool_result)
+  responseText?: string; // Tool output (for tool_result)
+  timestamp?: string; // When the message occurred
 }
 
 // Streaming event data
 interface StreamEvent {
-  event: 'content' | 'assistant' | 'tool_call' | 'tool_result' | 'history' | 'done' | 'error';
-  data: string;                     // Event payload (JSON string for structured events)
+  event:
+    | 'content'
+    | 'assistant'
+    | 'tool_call'
+    | 'tool_result'
+    | 'history'
+    | 'usage'
+    | 'done'
+    | 'error';
+  data: string; // Event payload (JSON string for structured events)
 }
 ```
 
 #### Non-Streaming Response
 
 **Success Response (200):**
+
 ```json
 {
   "output": "Based on the codebase structure, this appears to be a Node.js API project with TypeScript. The main components include...",
@@ -427,10 +452,10 @@ interface StreamEvent {
     {
       "type": "tool_call",
       "name": "file_search",
-      "arguments": {"query": "**/*.{js,ts,json}"}
+      "arguments": { "query": "**/*.{js,ts,json}" }
     },
     {
-      "type": "tool_result", 
+      "type": "tool_result",
       "name": "file_search",
       "ok": true,
       "responseText": "Found 25 TypeScript files, 3 JSON config files..."
@@ -450,11 +475,19 @@ interface StreamEvent {
       "type": "assistant",
       "content": "Based on the codebase structure, this appears to be a Node.js API project..."
     }
-  ]
+  ],
+  "usage": {
+    "prompt_tokens": 1250,
+    "completion_tokens": 892,
+    "total_tokens": 2142,
+    "cached_tokens": 450,
+    "tool_tokens": 75
+  }
 }
 ```
 
 **Error Response (400/500):**
+
 ```json
 {
   "error": "Missing required field: input"
@@ -462,6 +495,7 @@ interface StreamEvent {
 ```
 
 **Validation Error Response (400):**
+
 ```json
 {
   "error": "Invalid model specified. Supported models: gpt-4, gpt-3.5-turbo, z-ai/glm-4.6"
@@ -474,22 +508,24 @@ When `stream: true`, the API returns Server-Sent Events with real-time updates:
 
 **Event Types:**
 
-| Event | Description | Data Format | Example |
-|-------|-------------|-------------|---------|
-| `content` | Incremental text chunks | Raw text string | `"Based on the"` |
-| `assistant` | Complete assistant message | JSON object | `{"type":"assistant","content":"Complete response text"}` |
-| `tool_call` | AI tool execution started | JSON object | `{"type":"tool_call","name":"file_search","arguments":{"query":"*.ts"}}` |
-| `tool_result` | Tool execution completed | JSON object | `{"type":"tool_result","name":"file_search","ok":true,"responseText":"Found 10 files"}` |
-| `history` | Updated conversation history | JSON array | `[{"type":"user","content":"..."},{"type":"assistant","content":"..."}]` |
-| `done` | Stream completed successfully | String literal | `"true"` |
-| `error` | Error occurred | JSON object | `{"message":"Model API rate limit exceeded"}` |
+| Event         | Description                   | Data Format     | Example                                                                                 |
+| ------------- | ----------------------------- | --------------- | --------------------------------------------------------------------------------------- |
+| `content`     | Incremental text chunks       | Raw text string | `"Based on the"`                                                                        |
+| `assistant`   | Complete assistant message    | JSON object     | `{"type":"assistant","content":"Complete response text"}`                               |
+| `tool_call`   | AI tool execution started     | JSON object     | `{"type":"tool_call","name":"file_search","arguments":{"query":"*.ts"}}`                |
+| `tool_result` | Tool execution completed      | JSON object     | `{"type":"tool_result","name":"file_search","ok":true,"responseText":"Found 10 files"}` |
+| `history`     | Updated conversation history  | JSON array      | `[{"type":"user","content":"..."},{"type":"assistant","content":"..."}]`                |
+| `usage`       | Token usage statistics        | JSON object     | `{"prompt_tokens":1250,"completion_tokens":892,"total_tokens":2142}`                    |
+| `done`        | Stream completed successfully | String literal  | `"true"`                                                                                |
+| `error`       | Error occurred                | JSON object     | `{"message":"Model API rate limit exceeded"}`                                           |
 
 **Example Streaming Response:**
+
 ```
 event: content
 data: Based on the codebase structure
 
-event: content  
+event: content
 data: , this appears to be a Node.js
 
 event: tool_call
@@ -506,6 +542,9 @@ data: {"type":"assistant","content":"Based on the codebase structure, this appea
 
 event: history
 data: [{"type":"user","content":"Explain this codebase"},{"type":"assistant","content":"Based on the codebase structure..."}]
+
+event: usage
+data: {"prompt_tokens":1250,"completion_tokens":892,"total_tokens":2142,"cached_tokens":450,"tool_tokens":75}
 
 event: done
 data: true
@@ -530,7 +569,7 @@ curl -X POST http://localhost:8080/v1/generate \
 curl -N -X POST http://localhost:8080/v1/generate \
   -H "Content-Type: application/json" \
   -d '{
-    "input": "Generate unit tests for the authentication module", 
+    "input": "Generate unit tests for the authentication module",
     "stream": true
   }'
 ```
@@ -594,13 +633,13 @@ class KolosalAPI {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        ...(this.token && { 'Authorization': `Bearer ${this.token}` })
+        ...(this.token && { Authorization: `Bearer ${this.token}` }),
       },
       body: JSON.stringify({
         input,
         stream: false,
-        ...options
-      })
+        ...options,
+      }),
     });
 
     if (!response.ok) {
@@ -615,13 +654,13 @@ class KolosalAPI {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        ...(this.token && { 'Authorization': `Bearer ${this.token}` })
+        ...(this.token && { Authorization: `Bearer ${this.token}` }),
       },
       body: JSON.stringify({
         input,
         stream: true,
-        ...options
-      })
+        ...options,
+      }),
     });
 
     const reader = response.body.getReader();
@@ -660,17 +699,17 @@ class KolosalAPI:
     def __init__(self, base_url: str = "http://localhost:8080", token: Optional[str] = None):
         self.base_url = base_url
         self.token = token
-        
+
     def _headers(self) -> Dict[str, str]:
         headers = {"Content-Type": "application/json"}
         if self.token:
             headers["Authorization"] = f"Bearer {self.token}"
         return headers
-    
+
     def generate(self, input_text: str, **kwargs) -> Dict[str, Any]:
         """Generate a non-streaming response"""
         payload = {"input": input_text, "stream": False, **kwargs}
-        
+
         response = requests.post(
             f"{self.base_url}/v1/generate",
             headers=self._headers(),
@@ -678,11 +717,11 @@ class KolosalAPI:
         )
         response.raise_for_status()
         return response.json()
-    
+
     def generate_stream(self, input_text: str, **kwargs) -> Iterator[Dict[str, Any]]:
         """Generate a streaming response"""
         payload = {"input": input_text, "stream": True, **kwargs}
-        
+
         response = requests.post(
             f"{self.base_url}/v1/generate",
             headers=self._headers(),
@@ -690,7 +729,7 @@ class KolosalAPI:
             stream=True
         )
         response.raise_for_status()
-        
+
         for line in response.iter_lines():
             if line and line.startswith(b'data: '):
                 data = line[6:].decode('utf-8')
@@ -714,19 +753,20 @@ The API returns appropriate HTTP status codes with detailed error information:
 
 #### Status Codes
 
-| Code | Status | Description | Example Scenarios |
-|------|--------|-------------|-------------------|
-| 200 | Success | Request completed successfully | Valid request with proper response |
-| 400 | Bad Request | Invalid request format or parameters | Missing `input` field, invalid JSON |
-| 401 | Unauthorized | Authentication failed | Invalid or missing API token |
-| 429 | Too Many Requests | Rate limit exceeded | Too many concurrent requests |
-| 500 | Internal Server Error | Server or AI model error | AI service unavailable, processing error |
-| 502 | Bad Gateway | Upstream AI service error | AI model API is down |
-| 503 | Service Unavailable | Server temporarily unavailable | Maintenance mode, overloaded |
+| Code | Status                | Description                          | Example Scenarios                        |
+| ---- | --------------------- | ------------------------------------ | ---------------------------------------- |
+| 200  | Success               | Request completed successfully       | Valid request with proper response       |
+| 400  | Bad Request           | Invalid request format or parameters | Missing `input` field, invalid JSON      |
+| 401  | Unauthorized          | Authentication failed                | Invalid or missing API token             |
+| 429  | Too Many Requests     | Rate limit exceeded                  | Too many concurrent requests             |
+| 500  | Internal Server Error | Server or AI model error             | AI service unavailable, processing error |
+| 502  | Bad Gateway           | Upstream AI service error            | AI model API is down                     |
+| 503  | Service Unavailable   | Server temporarily unavailable       | Maintenance mode, overloaded             |
 
 #### Error Response Examples
 
 **Missing Required Field (400):**
+
 ```json
 {
   "error": "Missing required field: input",
@@ -739,6 +779,7 @@ The API returns appropriate HTTP status codes with detailed error information:
 ```
 
 **Authentication Error (401):**
+
 ```json
 {
   "error": "Invalid authentication token",
@@ -750,10 +791,11 @@ The API returns appropriate HTTP status codes with detailed error information:
 ```
 
 **AI Model Error (500):**
+
 ```json
 {
   "error": "AI model processing failed",
-  "code": "MODEL_ERROR", 
+  "code": "MODEL_ERROR",
   "details": {
     "model": "z-ai/glm-4.6",
     "message": "Model returned an unexpected response format"
@@ -762,6 +804,7 @@ The API returns appropriate HTTP status codes with detailed error information:
 ```
 
 **Rate Limit Error (429):**
+
 ```json
 {
   "error": "Rate limit exceeded",
@@ -783,5 +826,3 @@ Currently, there are no built-in rate limits, but consider implementing client-s
 ### CORS Support
 
 CORS is enabled by default when `corsEnabled` is set to `true` in the configuration, allowing web applications to make direct requests to the API.
-
-

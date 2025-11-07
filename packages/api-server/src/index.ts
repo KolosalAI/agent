@@ -9,12 +9,11 @@ export { startApiServer } from './server.js';
 export type { ApiServerOptions, ApiServer } from './types/index.js';
 
 // Additional exports for advanced usage
-export { ApiServerFactory } from './server.factory.js';
-export { Router } from './router.js';
+export { createApiServer } from './server.factory.js';
+export { handleHealth } from './handlers/health.handler.js';
+export { handleStatus } from './handlers/status.handler.js'; 
+export { handleGenerate } from './handlers/generate.handler.js';
 export type { 
-  HttpContext, 
-  RouteHandler, 
-  Middleware,
   GenerateRequest,
   GenerateResponse,
   GenerationResult,
