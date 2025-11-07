@@ -132,6 +132,26 @@ export HF_TOKEN="your_huggingface_token"
 export HF_MODEL="your_model_name"
 ```
 
+#### 3. Google OAuth Configuration (Required for Google Cloud Features)
+
+For Google Cloud authentication and Code Assist features, set these environment variables:
+
+```bash
+export GOOGLE_OAUTH_CLIENT_ID="your_google_oauth_client_id"
+export GOOGLE_OAUTH_CLIENT_SECRET="your_google_oauth_client_secret"
+```
+
+**Getting OAuth Credentials:**
+1. Go to the [Google Cloud Console](https://console.cloud.google.com/)
+2. Create or select a project
+3. Enable the required APIs
+4. Go to "Credentials" → "Create Credentials" → "OAuth 2.0 Client IDs"
+5. Configure the OAuth consent screen
+6. Create credentials for "Desktop application" type
+7. Copy the Client ID and Client Secret to your environment variables
+
+For more information, see: https://developers.google.com/identity/protocols/oauth2
+
 > **Note**: Kolosal CLI may issue multiple API calls per cycle, which can result in higher token usage. We're actively optimizing API efficiency.
 
 ### Configuration
