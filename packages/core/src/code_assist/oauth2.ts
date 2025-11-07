@@ -27,16 +27,22 @@ import { UserAccountManager } from '../utils/userAccountManager.js';
 const userAccountManager = new UserAccountManager();
 
 //  OAuth Client ID used to initiate OAuth2Client class.
-const OAUTH_CLIENT_ID = process.env['GOOGLE_OAUTH_CLIENT_ID'];
-if (!OAUTH_CLIENT_ID) {
-  throw new Error('GOOGLE_OAUTH_CLIENT_ID environment variable is required');
+function getOAuthClientId(): string {
+  const OAUTH_CLIENT_ID = process.env['GOOGLE_OAUTH_CLIENT_ID'];
+  if (!OAUTH_CLIENT_ID) {
+    throw new Error('GOOGLE_OAUTH_CLIENT_ID environment variable is required');
+  }
+  return OAUTH_CLIENT_ID;
 }
 
 // OAuth Secret value used to initiate OAuth2Client class.
 // This is loaded from environment variables for security purposes.
-const OAUTH_CLIENT_SECRET = process.env['GOOGLE_OAUTH_CLIENT_SECRET'];
-if (!OAUTH_CLIENT_SECRET) {
-  throw new Error('GOOGLE_OAUTH_CLIENT_SECRET environment variable is required');
+function getOAuthClientSecret(): string {
+  const OAUTH_CLIENT_SECRET = process.env['GOOGLE_OAUTH_CLIENT_SECRET'];
+  if (!OAUTH_CLIENT_SECRET) {
+    throw new Error('GOOGLE_OAUTH_CLIENT_SECRET environment variable is required');
+  }
+  return OAUTH_CLIENT_SECRET;
 }
 
 // OAuth Scopes for Cloud Code authorization.
@@ -69,8 +75,8 @@ async function initOauthClient(
   config: Config,
 ): Promise<OAuth2Client> {
   const client = new OAuth2Client({
-    clientId: OAUTH_CLIENT_ID,
-    clientSecret: OAUTH_CLIENT_SECRET,
+    clientId: getOAuthClientId(),
+    clientSecret: getOAuthClientSecret(),
     transporterOptions: {
       proxy: config.getProxy(),
     },

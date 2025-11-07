@@ -6,6 +6,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// Load environment variables from .env file
+import 'dotenv/config';
+
 import { startApiServer } from './index.js';
 import { Config, AuthType } from '@kolosal-ai/kolosal-ai-core';
 
