@@ -1,0 +1,40 @@
+{
+  "name": "@kolosal-ai/api-server-workspace",
+  "version": "0.1.3",
+  "description": "Kolosal AI API Server Workspace",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "type": "module",
+  "workspaces": [
+    "packages/api-server",
+    "packages/core"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KolosalAI/kolosal-cli.git"
+  },
+  "scripts": {
+    "start": "npm run start --workspace=@kolosal-ai/api-server",
+    "start:server": "npm run start:server --workspace=@kolosal-ai/api-server",
+    "start:server:debug": "npm run start:server:debug --workspace=@kolosal-ai/api-server",
+    "build": "npm run build --workspaces",
+    "build:api-server": "npm run build --workspace=@kolosal-ai/api-server",
+    "test": "npm run test --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "clean": "npm run clean --workspaces --if-present",
+    "docker:build": "./docker-build.sh",
+    "docker:build:latest": "./docker-build.sh latest",
+    "docker:run": "docker run -p 8080:8080 kolosal-ai/api-server:latest",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f"
+  },
+  "devDependencies": {
+    "@types/node": "^22.9.0",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.4"
+  },
+  "license": "Apache-2.0"
+}
