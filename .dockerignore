@@ -108,6 +108,3 @@ temp/
 __tests__/
 test/
 tests/
-
-# Scripts that aren't needed in production
-scripts/
