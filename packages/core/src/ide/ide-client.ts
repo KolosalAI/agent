@@ -399,11 +399,11 @@ export class IdeClient {
     const undiciPromise = import('undici');
     return async (url: string | URL, init?: RequestInit): Promise<Response> => {
       const { fetch: fetchFn } = await undiciPromise;
-      const fetchOptions: RequestInit & { dispatcher?: unknown } = {
+      const fetchOptions = {
         ...init,
-        dispatcher: agent,
+        dispatcher: agent as any,
       };
-      const options = fetchOptions as unknown as import('undici').RequestInit;
+      const options = fetchOptions as any;
       const response = await fetchFn(url, options);
       // Convert undici Headers to standard Headers for compatibility
       const standardHeaders = new Headers();
@@ -411,7 +411,7 @@ export class IdeClient {
         standardHeaders.set(key, value);
       }
 
-      return new Response(response.body as ReadableStream<unknown> | null, {
+      return new Response(response.body as any, {
         status: response.status,
         statusText: response.statusText,
         headers: standardHeaders,

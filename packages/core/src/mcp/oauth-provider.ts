@@ -592,7 +592,7 @@ export class MCPOAuthProvider {
 
       // First check if the server requires authentication via WWW-Authenticate header
       try {
-        const headers: HeadersInit = OAuthUtils.isSSEEndpoint(mcpServerUrl)
+        const headers: Record<string, string> = OAuthUtils.isSSEEndpoint(mcpServerUrl)
           ? { Accept: 'text/event-stream' }
           : { Accept: 'application/json' };
 

@@ -26,6 +26,11 @@ if (!process.cwd().includes('packages')) {
   process.exit(1);
 }
 
+// generate git commit info before building (for core package)
+if (process.cwd().includes('packages/core')) {
+  execSync('node ../../scripts/generate-git-commit-info.js', { stdio: 'inherit' });
+}
+
 // build typescript files
 execSync('tsc --build', { stdio: 'inherit' });
 
