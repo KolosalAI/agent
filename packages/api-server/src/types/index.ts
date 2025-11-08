@@ -39,6 +39,17 @@ export type TranscriptItem =
   | { type: 'tool_call'; name: string; arguments?: unknown }
   | { type: 'tool_result'; name: string; ok: boolean; responseText?: string; error?: string };
 
+export interface ToolInfo {
+  name: string;
+  description?: string;
+  parameters?: any;
+  server?: string; // For MCP tools
+}
+
+export interface ToolsResponse {
+  tools: ToolInfo[];
+}
+
 export interface GenerateRequest {
   input: string;
   stream?: boolean;
@@ -48,6 +59,7 @@ export interface GenerateRequest {
   api_key?: string;
   base_url?: string;
   working_directory?: string;
+  tools?: string[];
 }
 
 export interface GenerateResponse {

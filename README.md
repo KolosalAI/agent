@@ -19,9 +19,60 @@ Kolosal Agent API is a powerful HTTP API service that provides AI-powered code a
 - **Code Understanding** - Deep analysis and comprehension of complex codebases
 - **Streaming Support** - Real-time Server-Sent Events for responsive user experiences
 - **Multi-Model Support** - Compatible with OpenAI, custom models, and various AI providers
-- **Tool Integration** - Built-in code analysis, file operations, and development tools
+- **Tool Integration** - Built-in code analysis, file operations, and development tools with selective tool usage
+- **Tools Management** - List available tools and restrict tool usage per request
 - **Conversation History** - Multi-turn conversations with context preservation
 - **Flexible Configuration** - Environment variables and JSON configuration support
+
+## Tools
+
+Kolosal Agent includes a comprehensive set of tools that the AI can use to interact with your codebase and development environment. You can control which tools are available for each request, enabling fine-grained security and functionality control.
+
+### Tool Categories
+
+**File Operations:**
+- `read_file` - Read content from specific files
+- `write_file` - Create or write content to files  
+- `edit` - Make precise text replacements in existing files
+- `list_directory` - List files and directories
+- `read_many_files` - Read multiple files matching patterns
+
+**Search & Analysis:**
+- `glob` - Find files using glob patterns
+- `search_file_content` - Search for text patterns within files
+- `task` - Launch specialized AI agents for complex multi-step tasks
+
+**Development Tools:**
+- `run_shell_command` - Execute shell commands and scripts
+- `save_memory` - Store information for future reference
+- `web_fetch` - Fetch and analyze web content
+
+**Workflow Management:**
+- `todo_write` - Create and manage task lists for complex projects
+- `exit_plan_mode` - Control planning vs execution modes
+
+### Tool Usage Examples
+
+```bash
+# Get all available tools
+curl -X GET http://localhost:8080/v1/tools
+
+# Read-only analysis (safe for production environments)
+curl -X POST http://localhost:8080/v1/generate \
+  -H "Content-Type: application/json" \
+  -d '{
+    "input": "Analyze this codebase for security vulnerabilities",
+    "tools": ["read_file", "search_file_content", "glob"]
+  }'
+
+# Development mode (allows file modifications)
+curl -X POST http://localhost:8080/v1/generate \
+  -H "Content-Type: application/json" \
+  -d '{
+    "input": "Refactor this module to improve performance",
+    "tools": ["read_file", "edit", "run_shell_command", "todo_write"]
+  }'
+```
 
 ## Installation
 
@@ -68,23 +119,42 @@ curl -X POST http://localhost:8080/v1/generate \
   }'
 ```
 
-### 3. Example API Calls
+### 3. Example API Calls with Tool Restrictions
 
 ```bash
-# Code analysis
+# Code analysis with read-only tools
 curl -X POST http://localhost:8080/v1/generate \
   -H "Content-Type: application/json" \
-  -d '{"input": "Explain the structure of this project", "stream": false}'
+  -d '{
+    "input": "Analyze the project structure and identify potential issues",
+    "stream": false,
+    "tools": ["read_file", "list_directory", "search_file_content", "glob"]
+  }'
 
-# Generate tests
+# Code modification with editing tools
 curl -X POST http://localhost:8080/v1/generate \
   -H "Content-Type: application/json" \
-  -d '{"input": "Generate unit tests for the authentication module", "stream": false}'
+  -d '{
+    "input": "Fix the TypeScript compilation errors",
+    "stream": false,
+    "tools": ["read_file", "edit", "run_shell_command"]
+  }'
 
-# Code review
+# Memory-only interaction (no file access)
 curl -X POST http://localhost:8080/v1/generate \
   -H "Content-Type: application/json" \
-  -d '{"input": "Review this code for security issues and best practices", "stream": false}'
+  -d '{
+    "input": "Explain the difference between async/await and Promises",
+    "stream": false,
+    "tools": []
+  }'
+```
+
+### 4. List Available Tools
+
+```bash
+# Get all available tools and their descriptions
+curl -X GET http://localhost:8080/v1/tools | jq '.tools[] | {name: .name, description: .description}'
 ```
 
 ### Configuration
@@ -130,9 +200,44 @@ Alternatively, create a configuration file at `config/settings.json`:
 
 > **Note**: The API may issue multiple calls to the underlying AI model per request for complex tasks, which can result in higher token usage.
 
-## Usage Examples
+### Usage Examples
 
-### Code Analysis & Understanding
+#### List Available Tools
+
+```bash
+# Get all available tools
+curl -X GET http://localhost:8080/v1/tools | jq '.'
+```
+
+#### Restrict Tools Usage
+
+```bash
+# Only allow file reading tools
+curl -X POST http://localhost:8080/v1/generate \
+  -H "Content-Type: application/json" \
+  -d '{
+    "input": "Show me the main configuration files",
+    "tools": ["read_file", "list_directory", "glob"]
+  }'
+
+# Only allow editing tools for code modification
+curl -X POST http://localhost:8080/v1/generate \
+  -H "Content-Type: application/json" \
+  -d '{
+    "input": "Fix the TypeScript errors in this file",
+    "tools": ["edit", "read_file"]
+  }'
+
+# Analysis-only mode (no file modifications)
+curl -X POST http://localhost:8080/v1/generate \
+  -H "Content-Type: application/json" \
+  -d '{
+    "input": "Analyze the codebase structure and suggest improvements",
+    "tools": ["read_file", "list_directory", "glob", "search_file_content"]
+  }'
+```
+
+#### Code Analysis & Understanding
 
 ```bash
 # Analyze project structure
@@ -294,6 +399,33 @@ Check if the API server is running and healthy.
 }
 ```
 
+#### List Available Tools
+
+**GET** `/v1/tools`
+
+Get a list of all available tools that can be used in generate requests.
+
+**Response:**
+
+```json
+{
+  "tools": [
+    {
+      "name": "edit",
+      "description": "Replaces text within a file...",
+      "parameters": {...},
+      "server": null
+    },
+    {
+      "name": "read_file", 
+      "description": "Reads and returns the content of a specified file...",
+      "parameters": {...},
+      "server": null
+    }
+  ]
+}
+```
+
 #### Generate Content
 
 **POST** `/v1/generate`
@@ -330,6 +462,7 @@ Generate AI-powered responses for code assistance, analysis, and development tas
 | `api_key`           | string  | No       | Override the default API key                      |
 | `base_url`          | string  | No       | Override the default API base URL                 |
 | `working_directory` | string  | No       | Set the working directory for file operations     |
+| `tools`             | array   | No       | Restrict AI to only use specified tools          |
 
 #### Detailed Request Model
 
@@ -346,6 +479,7 @@ interface GenerateRequest {
   api_key?: string; // API key for the AI service
   base_url?: string; // Base URL for the AI service API
   working_directory?: string; // Working directory for file operations
+  tools?: string[]; // Restrict to specific tools (tool names)
 }
 
 interface ConversationMessage {
@@ -367,6 +501,7 @@ interface ConversationMessage {
   "prompt_id": "req-123",
   "working_directory": "/path/to/project",
   "model": "z-ai/glm-4.6",
+  "tools": ["read_file", "list_directory", "edit"],
   "history": [
     {
       "type": "user",
@@ -601,7 +736,8 @@ curl -X POST http://localhost:8080/v1/generate \
     "stream": false,
     "model": "z-ai/glm-4.6",
     "api_key": "your-api-key",
-    "base_url": "http://localhost:8081/v1"
+    "base_url": "http://localhost:8081/v1",
+    "tools": ["read_file", "search_file_content"]
   }' | jq
 ```
 
@@ -649,6 +785,21 @@ class KolosalAPI {
     return await response.json();
   }
 
+  async getTools() {
+    const response = await fetch(`${this.baseUrl}/v1/tools`, {
+      method: 'GET',
+      headers: {
+        ...(this.token && { Authorization: `Bearer ${this.token}` }),
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`API error: ${response.statusText}`);
+    }
+
+    return await response.json();
+  }
+
   async *generateStream(input, options = {}) {
     const response = await fetch(`${this.baseUrl}/v1/generate`, {
       method: 'POST',
@@ -684,7 +835,15 @@ class KolosalAPI {
 
 // Usage
 const api = new KolosalAPI();
-const result = await api.generate('Explain this function');
+
+// Get available tools
+const tools = await api.getTools();
+console.log('Available tools:', tools.tools.map(t => t.name));
+
+// Generate with specific tools
+const result = await api.generate('Explain this function', {
+  tools: ['read_file', 'search_file_content']
+});
 console.log(result.output);
 ```
 
@@ -718,6 +877,15 @@ class KolosalAPI:
         response.raise_for_status()
         return response.json()
 
+    def get_tools(self) -> Dict[str, Any]:
+        """Get list of available tools"""
+        response = requests.get(
+            f"{self.base_url}/v1/tools",
+            headers=self._headers()
+        )
+        response.raise_for_status()
+        return response.json()
+
     def generate_stream(self, input_text: str, **kwargs) -> Iterator[Dict[str, Any]]:
         """Generate a streaming response"""
         payload = {"input": input_text, "stream": True, **kwargs}
@@ -738,7 +906,16 @@ class KolosalAPI:
 
 # Usage
 api = KolosalAPI()
-result = api.generate("Review this code for best practices")
+
+# Get available tools
+tools = api.get_tools()
+print("Available tools:", [tool["name"] for tool in tools["tools"]])
+
+# Generate with specific tools
+result = api.generate(
+    "Review this code for best practices",
+    tools=["read_file", "search_file_content", "glob"]
+)
 print(result["output"])
 
 # Streaming example

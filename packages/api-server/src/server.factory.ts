@@ -13,6 +13,7 @@ import { HttpUtils } from './utils/http.js';
 import { handleHealth } from './handlers/health.handler.js';
 import { handleStatus } from './handlers/status.handler.js';
 import { handleGenerate } from './handlers/generate.handler.js';
+import { handleTools } from './handlers/tools.handler.js';
 
 export function createApiServer(config: Config, options: ApiServerOptions): Promise<ApiServer> {
   const enableCors = options.enableCors ?? true;
@@ -36,6 +37,8 @@ export function createApiServer(config: Config, options: ApiServerOptions): Prom
         await handleHealth(req, res, config, enableCors);
       } else if (method === 'GET' && pathname === '/status') {
         await handleStatus(req, res, config, enableCors);
+      } else if (method === 'GET' && pathname === '/v1/tools') {
+        await handleTools(req, res, config, enableCors);
       } else if (method === 'POST' && pathname === '/v1/generate') {
         await handleGenerate(req, res, config, enableCors, generationService);
       } else {

@@ -37,6 +37,7 @@ export async function handleGenerate(
   const apiKey = body?.api_key;
   const baseUrl = body?.base_url;
   const workingDirectory = body?.working_directory;
+  const tools = body?.tools;
 
   if (!input) {
     return HttpUtils.sendJson(
@@ -64,6 +65,7 @@ export async function handleGenerate(
         apiKey,
         baseUrl,
         workingDirectory,
+        tools,
       );
     } else {
       await handleNonStreamingResponse(
@@ -78,6 +80,7 @@ export async function handleGenerate(
         apiKey,
         baseUrl,
         workingDirectory,
+        tools,
       );
     }
   } catch (e) {
@@ -102,6 +105,7 @@ async function handleStreamingResponse(
   apiKey?: string,
   baseUrl?: string,
   workingDirectory?: string,
+  tools?: string[],
 ): Promise<void> {
   HttpUtils.setupSseHeaders(res, enableCors);
 
@@ -139,6 +143,7 @@ async function handleStreamingResponse(
       apiKey,
       baseUrl,
       workingDirectory,
+      tools,
     },
   );
 
@@ -164,6 +169,7 @@ async function handleNonStreamingResponse(
   apiKey?: string,
   baseUrl?: string,
   workingDirectory?: string,
+  tools?: string[],
 ): Promise<void> {
   const { finalText, transcript, history: updatedHistory, usage } = 
     await generationService.generateResponse(
@@ -176,6 +182,7 @@ async function handleNonStreamingResponse(
         apiKey,
         baseUrl,
         workingDirectory,
+        tools,
       },
     );
 

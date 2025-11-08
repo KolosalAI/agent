@@ -18,6 +18,21 @@ import type {
 export class GenerationService {
   constructor(private config: Config) {}
 
+  /**
+   * Get all available tools from the tool registry
+   */
+  getAvailableTools(): { name: string; description?: string; parameters?: any; server?: string }[] {
+    const toolRegistry = this.config.getToolRegistry();
+    const tools = toolRegistry.getAllTools();
+    
+    return tools.map(tool => ({
+      name: tool.name,
+      description: tool.schema?.description,
+      parameters: tool.schema?.parameters,
+      server: (tool as any).serverName || undefined, // For MCP tools
+    }));
+  }
+
   async generateResponse(
     input: string,
     promptId: string,
@@ -30,9 +45,10 @@ export class GenerationService {
       apiKey?: string;
       baseUrl?: string;
       workingDirectory?: string;
+      tools?: string[];
     } = {},
   ): Promise<GenerationResult> {
-    const { onContentChunk, onEvent, conversationHistory, model, apiKey, baseUrl, workingDirectory } = options;
+    const { onContentChunk, onEvent, conversationHistory, model, apiKey, baseUrl, workingDirectory, tools } = options;
 
     // Set approval mode to YOLO for API requests to auto-approve tool calls
     const originalApprovalMode = this.config.getApprovalMode();
@@ -107,6 +123,15 @@ export class GenerationService {
       }
       
       this.setupConversationHistory(geminiClient, conversationHistory);
+      
+      // Set up tools for this request - either specific tools or all available tools
+      if (tools && tools.length > 0) {
+        this.setupCustomTools(geminiClient, tools);
+      } else {
+        // No specific tools requested, ensure all tools are available
+        await this.setupAllTools(geminiClient);
+      }
+      
       this.logDebugInfo();
 
       const processedQuery = await this.processAtCommand(input, signal);
@@ -158,6 +183,46 @@ export class GenerationService {
         console.error('[API] Failed to clear conversation history:', e);
         throw new Error('Unable to initialize conversation history');
       }
+    }
+  }
+
+  private setupCustomTools(geminiClient: any, toolNames: string[]): void {
+    try {
+      const toolRegistry = this.config.getToolRegistry();
+      const allDeclarations = toolRegistry.getFunctionDeclarations();
+      
+      // Filter declarations to only include the requested tools
+      const filteredDeclarations = allDeclarations.filter(decl => 
+        toolNames.includes(decl.name || '')
+      );
+      
+      if (filteredDeclarations.length === 0) {
+        console.warn('[API] No valid tools found for the requested tool names:', toolNames);
+        console.warn('[API] Available tools:', allDeclarations.map(d => d.name));
+      }
+      
+      // Set the filtered tools on the client
+      const tools = [{ functionDeclarations: filteredDeclarations }];
+      geminiClient.getChat().setTools(tools);
+      
+      console.log('[API] Set custom tools:', filteredDeclarations.map(d => d.name));
+    } catch (e) {
+      console.error('[API] Failed to set custom tools:', e);
+      throw new Error('Failed to configure custom tools');
+    }
+  }
+
+  private async setupAllTools(geminiClient: any): Promise<void> {
+    try {
+      // Use the built-in setTools method to set all available tools
+      await geminiClient.setTools();
+      
+      const toolRegistry = this.config.getToolRegistry();
+      const allDeclarations = toolRegistry.getFunctionDeclarations();
+      console.log('[API] Set all available tools:', allDeclarations.map(d => d.name));
+    } catch (e) {
+      console.error('[API] Failed to set all tools:', e);
+      throw new Error('Failed to configure tools');
     }
   }
 
