@@ -16,8 +16,12 @@ async function main() {
   try {
     // Parse command line arguments
     const args = process.argv.slice(2);
-    const port = getArgValue(args, '--api-port') || process.env['KOLOSAL_CLI_API_PORT'] || 8080;
-    const host = getArgValue(args, '--api-host') || process.env['KOLOSAL_CLI_API_HOST'] || '127.0.0.1';
+    // Railway sets PORT environment variable, use it with priority
+    const port = process.env['PORT'] || 
+                 getArgValue(args, '--api-port') || 
+                 process.env['KOLOSAL_CLI_API_PORT'] || 
+                 8080;
+    const host = getArgValue(args, '--api-host') || process.env['KOLOSAL_CLI_API_HOST'] || '0.0.0.0';
     const corsEnabled = process.env['KOLOSAL_CLI_API_CORS'] ? 
       ['1', 'true', 'yes'].includes(String(process.env['KOLOSAL_CLI_API_CORS']).toLowerCase()) : 
       true;
