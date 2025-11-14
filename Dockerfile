@@ -24,8 +24,7 @@ COPY packages/api-server/package*.json ./packages/api-server/
 COPY packages/test-utils/package*.json ./packages/test-utils/
 
 # Install dependencies with Railway cache mount
-# Note: Replace <service-id> with your actual Railway service ID
-RUN --mount=type=cache,target=/root/.npm \
+RUN --mount=type=cache,id=npm-cache,target=/root/.npm \
     npm ci --only=production=false
 
 # Copy source code and build scripts
@@ -53,7 +52,7 @@ COPY packages/api-server/package*.json ./packages/api-server/
 COPY packages/test-utils/package*.json ./packages/test-utils/
 
 # Install only production dependencies with Railway cache mount
-RUN --mount=type=cache,target=/root/.npm \
+RUN --mount=type=cache,id=npm-cache,target=/root/.npm \
     npm ci --only=production && npm cache clean --force
 
 # Copy built application from builder stage
