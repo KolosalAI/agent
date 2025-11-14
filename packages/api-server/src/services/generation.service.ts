@@ -28,8 +28,8 @@ export class GenerationService {
     return tools.map(tool => ({
       name: tool.name,
       description: tool.schema?.description,
-      parameters: tool.schema?.parameters,
-      server: (tool as any).serverName || undefined, // For MCP tools
+      parameters: tool.schema?.parametersJsonSchema,
+      server: (tool as any).serverName || null, // For MCP tools
     }));
   }
 
