@@ -84,24 +84,24 @@ ENV KOLOSAL_CLI_API_PORT=${PORT:-8080}
 
 # Health check (Railway compatible)
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD node -e "
-    const http = require('http');
-    const port = process.env.PORT || process.env.KOLOSAL_CLI_API_PORT || 8080;
-    const options = {
-      host: '0.0.0.0',
-      port: port,
-      path: '/healthz',
-      timeout: 2000
-    };
-    const req = http.request(options, (res) => {
-      if (res.statusCode === 200) {
-        process.exit(0);
-      } else {
-        process.exit(1);
-      }
-    });
-    req.on('error', () => process.exit(1));
-    req.end();
+  CMD node -e "\
+    const http = require('http'); \
+    const port = process.env.PORT || process.env.KOLOSAL_CLI_API_PORT || 8080; \
+    const options = { \
+      host: '0.0.0.0', \
+      port: port, \
+      path: '/healthz', \
+      timeout: 2000 \
+    }; \
+    const req = http.request(options, (res) => { \
+      if (res.statusCode === 200) { \
+        process.exit(0); \
+      } else { \
+        process.exit(1); \
+      } \
+    }); \
+    req.on('error', () => process.exit(1)); \
+    req.end(); \
   "
 
 # Use dumb-init for proper signal handling
