@@ -77,6 +77,10 @@ ENV KOLOSAL_CLI_API_HOST=0.0.0.0
 ENV KOLOSAL_CLI_API_PORT=8080
 ENV KOLOSAL_CLI_API_CORS=true
 
+# Set default Google OAuth credentials (dummy values to prevent errors)
+ENV GOOGLE_OAUTH_CLIENT_ID=default-client-id
+ENV GOOGLE_OAUTH_CLIENT_SECRET=default-client-secret
+
 # Railway will set the PORT environment variable
 # Use it if available, otherwise default to 8080
 ENV PORT=${PORT:-8080}
