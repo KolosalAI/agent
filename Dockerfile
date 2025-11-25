@@ -37,10 +37,9 @@ RUN npm run build --workspaces
 # Production stage
 FROM node:20-alpine AS production
 
-# Install runtime dependencies (including git for repo cloning)
+# Install runtime dependencies
 RUN apk add --no-cache \
     dumb-init \
-    git \
     && addgroup -g 1001 -S kolosal \
     && adduser -S kolosal -u 1001
 
@@ -66,9 +65,6 @@ COPY --from=builder /app/scripts ./scripts
 # Change ownership to non-root user
 RUN chown -R kolosal:kolosal /app
 
-# Create workspace directory for cloned repositories
-RUN mkdir -p /app/workspace && chown -R kolosal:kolosal /app/workspace
-
 # Switch to non-root user
 USER kolosal
 
@@ -84,12 +80,6 @@ ENV KOLOSAL_CLI_API_CORS=true
 # Set default Google OAuth credentials (dummy values to prevent errors)
 ENV GOOGLE_OAUTH_CLIENT_ID=default-client-id
 ENV GOOGLE_OAUTH_CLIENT_SECRET=default-client-secret
-
-# GitHub repository cloning configuration (optional - set these in Railway Dashboard > Variables)
-# GITHUB_REPO_PATH      - Repository to clone at startup (format: owner/repo or full URL)
-# GITHUB_ACCESS_TOKEN   - OAuth token for private repositories
-# GITHUB_REPO_BRANCH    - Branch to clone (optional, defaults to main)
-# AGENT_WORKSPACE_DIR   - Clone target directory (optional, defaults to /app/workspace)
 
 # Railway will set the PORT environment variable
 # Use it if available, otherwise default to 8080

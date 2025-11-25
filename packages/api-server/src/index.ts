@@ -13,12 +13,6 @@ export { createApiServer } from './server.factory.js';
 export { handleHealth } from './handlers/health.handler.js';
 export { handleStatus } from './handlers/status.handler.js'; 
 export { handleGenerate } from './handlers/generate.handler.js';
-export { 
-  initializeWorkspaceFromGitHub,
-  cloneRepository,
-  getGitCloneConfigFromEnv,
-  GIT_ENV_VARS
-} from './utils/gitClone.js';
 export type { 
   GenerateRequest,
   GenerateResponse,
@@ -27,7 +21,3 @@ export type {
   StreamEventCallback,
   ContentStreamCallback
 } from './types/index.js';
-export type {
-  GitCloneConfig,
-  GitCloneResult
-} from './utils/gitClone.js';
