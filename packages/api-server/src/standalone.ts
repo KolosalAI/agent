@@ -11,9 +11,16 @@ import 'dotenv/config';
 
 import { startApiServer } from './index.js';
 import { Config, AuthType } from '@kolosal-ai/kolosal-ai-core';
+import { initializeWorkspaceFromGitHub } from './utils/gitClone.js';
 
 async function main() {
   try {
+    // Initialize workspace from GitHub if configured
+    const gitResult = await initializeWorkspaceFromGitHub();
+    
+    // Determine the working directory - use cloned repo if available
+    const workingDir = gitResult?.success ? gitResult.workspaceDir : process.cwd();
+    
     // Parse command line arguments
     const args = process.argv.slice(2);
     // Railway sets PORT environment variable, use it with priority
@@ -30,8 +37,8 @@ async function main() {
     // Note: For a fully functional server, you'll need to provide proper config
     const config = new Config({
       sessionId: `api-server-${Date.now()}`,
-      targetDir: process.cwd(),
-      cwd: process.cwd(),
+      targetDir: workingDir,
+      cwd: workingDir,
       debugMode: process.env['DEBUG'] === '1' || args.includes('--debug'),
       model: 'z-ai/glm-4.6', // Default model - can be overridden by API requests
       excludeTools: [],
@@ -42,6 +49,7 @@ async function main() {
     console.log(`Host: ${host}`);
     console.log(`Port: ${port}`);
     console.log(`CORS: ${corsEnabled ? 'enabled' : 'disabled'}`);
+    console.log(`Working directory: ${workingDir}`);
 
     // Initialize the config - this is critical for proper operation
     console.log('Initializing configuration...');
