@@ -46,7 +46,7 @@ describe('DashScopeOpenAICompatibleProvider', () => {
       baseUrl: 'https://dashscope.aliyuncs.com/compatible-mode/v1',
       timeout: 60000,
       maxRetries: 2,
-      model: 'kolosal-max',
+      model: 'qwen-max',
       authType: AuthType.USE_OPENAI,
     } as ContentGeneratorConfig;
 
@@ -229,7 +229,7 @@ describe('DashScopeOpenAICompatibleProvider', () => {
 
   describe('buildRequest', () => {
     const baseRequest: OpenAI.Chat.ChatCompletionCreateParams = {
-      model: 'kolosal-max',
+      model: 'qwen-max',
       messages: [
         { role: 'system', content: 'You are a helpful assistant.' },
         { role: 'user', content: 'Hello!' },
@@ -446,7 +446,7 @@ describe('DashScopeOpenAICompatibleProvider', () => {
 
       const result = provider.buildRequest(complexRequest, 'test-prompt-id');
 
-      expect(result.model).toBe('kolosal-max');
+      expect(result.model).toBe('qwen-max');
       expect(result.temperature).toBe(0.8);
       expect(result.max_tokens).toBe(1000);
       expect(result.top_p).toBe(0.9);
@@ -462,7 +462,7 @@ describe('DashScopeOpenAICompatibleProvider', () => {
           typeof mockCliConfig.getContentGeneratorConfig
         >
       ).mockReturnValue({
-        model: 'kolosal-max',
+        model: 'qwen-max',
         disableCacheControl: true,
       });
 
@@ -475,7 +475,7 @@ describe('DashScopeOpenAICompatibleProvider', () => {
 
     it('should handle messages with array content for streaming requests', () => {
       const requestWithArrayContent: OpenAI.Chat.ChatCompletionCreateParams = {
-        model: 'kolosal-max',
+        model: 'qwen-max',
         stream: true, // This will trigger cache control on last message
         messages: [
           {
@@ -507,7 +507,7 @@ describe('DashScopeOpenAICompatibleProvider', () => {
 
     it('should handle empty messages array', () => {
       const emptyRequest: OpenAI.Chat.ChatCompletionCreateParams = {
-        model: 'kolosal-max',
+        model: 'qwen-max',
         messages: [],
       };
 
@@ -519,7 +519,7 @@ describe('DashScopeOpenAICompatibleProvider', () => {
 
     it('should handle messages without content for streaming requests', () => {
       const requestWithoutContent: OpenAI.Chat.ChatCompletionCreateParams = {
-        model: 'kolosal-max',
+        model: 'qwen-max',
         stream: true, // This will trigger cache control on last message
         messages: [
           { role: 'assistant', content: null },
@@ -547,7 +547,7 @@ describe('DashScopeOpenAICompatibleProvider', () => {
 
     it('should add cache control to last text item in mixed content for streaming requests', () => {
       const requestWithMixedContent: OpenAI.Chat.ChatCompletionCreateParams = {
-        model: 'kolosal-max',
+        model: 'qwen-max',
         stream: true, // This will trigger cache control on last message
         messages: [
           {
@@ -589,7 +589,7 @@ describe('DashScopeOpenAICompatibleProvider', () => {
 
     it('should add empty text item with cache control if last item is not text for streaming requests', () => {
       const requestWithNonTextLast: OpenAI.Chat.ChatCompletionCreateParams = {
-        model: 'kolosal-max',
+        model: 'qwen-max',
         stream: true, // This will trigger cache control on last message
         messages: [
           {
@@ -626,7 +626,7 @@ describe('DashScopeOpenAICompatibleProvider', () => {
   describe('cache control edge cases', () => {
     it('should handle request with only system message', () => {
       const systemOnlyRequest: OpenAI.Chat.ChatCompletionCreateParams = {
-        model: 'kolosal-max',
+        model: 'qwen-max',
         messages: [{ role: 'system', content: 'System prompt' }],
       };
 
@@ -644,7 +644,7 @@ describe('DashScopeOpenAICompatibleProvider', () => {
 
     it('should handle request without system message for streaming requests', () => {
       const noSystemRequest: OpenAI.Chat.ChatCompletionCreateParams = {
-        model: 'kolosal-max',
+        model: 'qwen-max',
         stream: true, // This will trigger cache control on last message
         messages: [
           { role: 'user', content: 'First message' },
@@ -671,7 +671,7 @@ describe('DashScopeOpenAICompatibleProvider', () => {
 
     it('should handle empty content array for streaming requests', () => {
       const emptyContentRequest: OpenAI.Chat.ChatCompletionCreateParams = {
-        model: 'kolosal-max',
+        model: 'qwen-max',
         stream: true, // This will trigger cache control on last message
         messages: [
           {
